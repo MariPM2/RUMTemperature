@@ -12,7 +12,8 @@
 
 //MQTT BROKER
 const char *mqttServer = "15.156.41.54";
-const char *topic = "Room204/temperature"; //Must be changed to corresponding Room that each ESP will be located and info must match 
+const char *TempC = "Room204/tempC";
+const char *TempF = "Room204/tempF";
 const int mqttPort = 1883;
 
 
@@ -88,6 +89,7 @@ void loop() {
   float Rt = 10 * voltage / (3.3 - voltage);                       //calculate resistance value of thermistor
   double tempK = 1 / (1 / (273.15 + 25) + log(Rt / 10) / 3950.0);  //calculate temperature (Kelvin)
   tempC = tempK - 273.15;                                   //calculate temperature (Celsius)
+  double tempF = (tempC * 9 / 5) + 32;                         //Calculate temperature (Fahrenheit)
   double button = analogRead(PIN_ANALOG_IN_INTERRUPTOR);
   
   if (temperatureQuotient != 0){
@@ -110,7 +112,7 @@ void loop() {
     }
     delay(500);
   }
-  Serial.printf("Calibration Time: %d,\tVoltage : %.2fV, \tTemperature : %.2fC\n", calibration_time, voltage, tempC);
+  Serial.printf("Calibration Time: %d,\tVoltage : %.2fV, \tTemperature in C : %.2fC, \tTemperature in F : %.2fF\n", calibration_time, voltage, tempC, tempF);
   delay(1000);
 
   printf("Button: %.2f\n", button);
@@ -119,7 +121,8 @@ void loop() {
   {
     connectToBroker();
   }
-  client.publish(topic, String(tempC).c_str());
+  client.publish(TempC, String(tempC).c_str());
+  client.publish(TempF, String(tempF).c_str());
   client.loop();
 }
 
