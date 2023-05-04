@@ -1,0 +1,119 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+
+typedef struct {
+    const char* name;
+    void (*handle_enter)();
+    void (*handle_exit)();
+} State;
+
+typedef struct {
+    const char* name;
+} Event;
+
+typedef struct {
+    const char* current_state;
+    const char* current_event;
+    const char* next_state;
+    void (*handle_event)();
+    void (*handle_exit)();
+} Transition;
+
+const char* current_state = "waiting";
+int people_count = 0;
+bool last_sensor_triggered = false;
+bool sensor_triggered[2] = {false, false};
+
+State sensor_states[] = {
+    {"waiting", NULL, NULL},
+    {"triggered1", NULL, NULL},
+    {"occupied", NULL, NULL},
+    {"triggered2", NULL, NULL},
+};
+
+Event sensor_events[] = {
+    {"triggered"},
+    {"timeout"}
+};
+
+Transition sensor_transitions[] = {
+    {"waiting", "triggered", "triggered1", NULL, NULL},
+    {"triggered1", "timeout", "waiting", NULL, NULL},
+    {"triggered1", "triggered", "occupied", NULL, NULL},
+    {"occupied", "triggered", "triggered2", NULL, NULL},
+    {"triggered2", "timeout", "waiting", NULL, NULL},
+};
+
+void handle_fsm_event(const char* event, const char* state){
+    for(int i=0; i<sizeof(sensor_transitions)/sizeof(sensor_transitions[0]); i++){
+        Transition transition = sensor_transitions[i];
+        if(strcmp(transition.current_state, state) == 0 && strcmp(transition.current_event, event) == 0){
+            if (transition.handle_exit != NULL) {
+                transition.handle_exit();
+            }
+            current_state = transition.next_state;
+            if (transition.handle_event != NULL) {
+                transition.handle_event();
+            }
+            break;
+        }
+    }
+    if(strcmp(current_state, sensor_states[2].name) == 0){ // "occupied"
+        if(last_sensor_triggered) {
+            people_count++;
+            printf("Person entered the room.\n");
+            printf("People count: %d\n", people_count);
+            last_sensor_triggered = false;
+        }
+    }
+    else if(strcmp(current_state, sensor_states[0].name) == 0){ // "waiting"
+        if(last_sensor_triggered) {
+            if (people_count > 0) {
+                people_count--;
+                printf("Person left the room.\n");
+            }
+            printf("People count: %d\n", people_count);
+            last_sensor_triggered = false;
+        }
+    }
+}
+
+void sensor_task(void* arg){
+    bool* sensor_triggered_ptr = (bool*) arg;
+    const char* event_name = sensor_triggered_ptr == &sensor_triggered[0] ? "Sensor 1: Person entered the room.\n" : "Sensor 2: Person left the room.\n";
+
+    while(1){
+        if(rand()%10 == 0){
+            printf("%s", event_name);
+            *sensor_triggered_ptr = true;
+            if (last_sensor_triggered != *sensor_triggered_ptr) {
+                last_sensor_triggered = *sensor_triggered_ptr;
+                handle_fsm_event(sensor_events[0].name, current_state); // "triggered"
+            }
+        }
+        vTaskDelay(pdMS_TO_TICKS(1000));
+    }
+}
+
+void timeout_task(void* arg){
+    while(1){
+        vTaskDelay(pdMS_TO_TICKS(5000));
+        if (last_sensor_triggered) {
+            handle_fsm_event (sensor_events[1].name, current_state); // "timeout"
+        }
+    }
+}
+
+void setup(){
+    xTaskCreate(&sensor_task, "sensor_task1", 2048, &sensor_triggered[0], 5, NULL);
+    xTaskCreate(&sensor_task, "sensor_task2", 2048, &sensor_triggered[1], 5, NULL);
+    xTaskCreate(&timeout_task, "timeout_task", 2048, NULL, 5, NULL);
+}
+
+void loop() {
+  
+}
