@@ -4,6 +4,7 @@
 
 #define PIN_ANALOG_IN_TEMPERATURE 36
 #define PIN_ANALOG_IN_INTERRUPTOR 32
+#define PIN_LED_ON 25
 
 //WIFI
 #define WIFI_NAME "Uncle Boobs" //The wifi name and password must be changed to match the compatible networks
@@ -80,6 +81,9 @@ void setup() {
   Serial.begin(9600);
   connectToWifi();
   connectToBroker();
+  
+  pinMode(PIN_LED_ON, OUTPUT);
+  digitalWrite(PIN_LED_ON, HIGH);
 }
 
 void loop() {
