@@ -27,4 +27,4 @@ To implement this solution, we used the following tools and technologies:
 - Node-RED
 - Whois domain webservice
 
-This IoT solution provides an efficient way to monitor the temperature and occupancy of several rooms in the University of Mayaguez Campus. The data is easily accessible via Siri or a web interface, which allows users to quickly identify rooms that need adjustment in their temperature settings and maximum capacity.
+This IoT solution provides an efficient way to monitor the temperature and occupancy of several rooms in the University of Puerto Rico - Mayaguez Campus. The data is easily accessible via Siri or a web interface, which allows users to quickly identify rooms that need adjustment in their temperature settings and maximum capacity.
