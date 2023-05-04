@@ -2,6 +2,6 @@
 
 **WOKWI CODES** 
 
-- FSM A/C wokwi code 
-- FSM Ultrasound code
-- Temperature Circuit Wokwi
+- FSM A/C wokwi code: https://wokwi.com/projects/361496844708275201
+- FSM Ultrasound code: https://wokwi.com/projects/361728583557641217
+- Temperature Circuit Wokwi: https://wokwi.com/projects/363725695777744897
