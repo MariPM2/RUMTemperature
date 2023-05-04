@@ -1,3 +1,4 @@
+#RUM Temp
 This code is a firmware for an ESP32 device that has both ultrasonic sensors and temperature sensors, as well as MQTT communication capabilities. It can count the number of people entering and exiting a room with a capacity limit of ten people while also measuring the temperature in Celsius and Fahrenheit and publishing the values to an MQTT broker.
 
 **Components connected to the ESP32:**
